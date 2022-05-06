@@ -52,7 +52,7 @@ echo "Downloading $redis2_nginx_url"
     --with-http_ssl_module \
     --prefix=/tmp/nginx \
     --add-module=${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
-    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/nginx-uuid4-module-${UUID4_VERSION}
+    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/nginx-uuid4-module-${UUID4_VERSION} \
     --add-module=${temp_dir}/nginx-${NGINX_VERSION}/redis2-nginx-module-${REDIS2_NGINX_VERSION}
   make install
 )
@@ -69,7 +69,7 @@ echo "Downloading $redis2_nginx_url"
     --with-http_ssl_module \
     --prefix=/tmp/nginx-debug \
     --add-module=${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
-    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/nginx-uuid4-module-${UUID4_VERSION}
+    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/nginx-uuid4-module-${UUID4_VERSION} \
     --add-module=${temp_dir}/nginx-${NGINX_VERSION}/redis2-nginx-module-${REDIS2_NGINX_VERSION}
   make install
 )
