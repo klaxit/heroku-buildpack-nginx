@@ -16,10 +16,27 @@ lua_jit_url=https://github.com/openresty/luajit2/archive/refs/tags/v${LUA_JIT_VE
 (curl -L $lua_jit_url | tar xvz )
 (cd luajit2-${LUA_JIT_VERSION} && make install PREFIX="$BUILD_DIR")
 
+
 LUA_RESTY_REDIS=${LUA_RESTY_REDIS-0.29}
 lua_resty_redis_url=https://github.com/openresty/lua-resty-redis/archive/refs/tags/v${LUA_RESTY_REDIS}.tar.gz
 echo "Downloading $lua_resty_redis_url"
-(curl -L $lua_resty_redis_url | tar xvz )
+(cd "$BUILD_DIR/lib/" && curl -L $lua_resty_redis_url | tar xvz )
+
+
+LUA_RESTY_CORE=${LUA_RESTY_CORE-0.1.22}
+LUA_RESTY_CACHE=${LUA_RESTY_CACHE-0.11}
+
+lua_resty_core_url=https://github.com/openresty/lua-resty-core/archive/refs/tags/v${LUA_RESTY_CORE}.tar.gz
+lua_resty_lrucache_url=https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${LUA_RESTY_CACHE}.tar.gz
+
+echo "Downloading $lua_resty_core_url"
+(curl -L $lua_resty_core_url | tar xvz )
+
+echo "Downloading $lua_resty_lrucache_url"
+(curl -L $lua_resty_lrucache_url | tar xvz )
+
+(cd lua-resty-core-${LUA_RESTY_CORE} && make install PREFIX="$BUILD_DIR/")
+(cd lua-resty-lrucache-${LUA_RESTY_CACHE} && make install PREFIX="$BUILD_DIR/")
 
 mkdir -p "$BUILD_DIR/bin/"
 mkdir -p "$BUILD_DIR/nginx"

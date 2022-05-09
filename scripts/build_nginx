@@ -59,12 +59,6 @@ echo "Downloading $ngx_devel_kit_url"
 echo "Downloading $ngx_lua_url"
 (cd nginx-${NGINX_VERSION} && curl -L $ngx_lua_url | tar xvz )
 
-echo "Downloading $lua_resty_core_url"
-(cd nginx-${NGINX_VERSION} && curl -L $lua_resty_core_url | tar xvz )
-
-echo "Downloading $lua_resty_lrucache_url"
-(cd nginx-${NGINX_VERSION} && curl -L $lua_resty_lrucache_url | tar xvz )
-
 echo "Installing luajit"
 (cd nginx-${NGINX_VERSION} && cd luajit2-${LUA_JIT_VERSION} && make install)
 
@@ -91,10 +85,6 @@ export LUAJIT_INC=/usr/local/include/luajit-2.1
   make install
 )
 
-
-
-(cd ${temp_dir}/nginx-${NGINX_VERSION}/lua-resty-core-${LUA_RESTY_CORE} && make install PREFIX=/tmp/nginx)
-(cd ${temp_dir}/nginx-${NGINX_VERSION}/lua-resty-lrucache-${LUA_RESTY_CACHE} && make install PREFIX=/tmp/nginx)
 
 release_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
