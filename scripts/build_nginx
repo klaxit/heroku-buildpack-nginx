@@ -4,19 +4,31 @@
 # image. More information on the Heroku Stack can be found
 # at https://devcenter.heroku.com/articles/stack
 
-NGINX_VERSION=${NGINX_VERSION-1.20.1}
+NGINX_VERSION=${NGINX_VERSION-1.19.3}
 PCRE_VERSION=${PCRE_VERSION-8.44}
 HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.33}
 ZLIB_VERSION=${ZLIB_VERSION-1.2.12}
 UUID4_VERSION=${UUID4_VERSION-master}
-REDIS2_NGINX_VERSION=${REDIS2_NGINX_VERSION-0.15}
+
+LUA_JIT_VERSION=${LUA_JIT-2.1-20220411}
+NGX_DEVEL_KIT=${NGX_DEVEL_KIT-0.3.1}
+NGX_LUA=${NGX_LUA-0.10.20}
+LUA_RESTY_CORE=${LUA_RESTY_CORE-0.1.22}
+LUA_RESTY_CACHE=${LUA_RESTY_CACHE-0.11}
+LUA_RESTY_REDIS=${LUA_RESTY_REDIS-0.29}
 
 nginx_tarball_url=https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=https://sourceforge.net/projects/pcre/files/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.gz/download
 headers_more_nginx_module_url=https://github.com/openresty/headers-more-nginx-module/archive/v${HEADERS_MORE_VERSION}.tar.gz
 uuid4_url=https://github.com/cybozu/nginx-uuid4-module/archive/${UUID4_VERSION}.tar.gz
 zlib_url=http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
-redis2_nginx_url=https://github.com/openresty/redis2-nginx-module/archive/refs/tags/v${REDIS2_NGINX_VERSION}.tar.gz
+
+lua_jit_url=https://github.com/openresty/luajit2/archive/refs/tags/v${LUA_JIT_VERSION}.tar.gz
+ngx_devel_kit_url=https://github.com/vision5/ngx_devel_kit/archive/refs/tags/v${NGX_DEVEL_KIT}.tar.gz
+ngx_lua_url=https://github.com/openresty/lua-nginx-module/archive/refs/tags/v${NGX_LUA}.tar.gz
+lua_resty_core_url=https://github.com/openresty/lua-resty-core/archive/refs/tags/v${LUA_RESTY_CORE}.tar.gz
+lua_resty_lrucache_url=https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${LUA_RESTY_CACHE}.tar.gz
+lua_resty_redis_url=https://github.com/openresty/lua-resty-redis/archive/refs/tags/v${LUA_RESTY_REDIS}.tar.gz
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
@@ -38,13 +50,37 @@ echo "Downloading $zlib_url"
 echo "Downloading $uuid4_url"
 (cd nginx-${NGINX_VERSION} && curl -L $uuid4_url | tar xvz )
 
-echo "Downloading $redis2_nginx_url"
-(cd nginx-${NGINX_VERSION} && curl -L $redis2_nginx_url | tar xvz )
+echo "Downloading $lua_jit_url"
+(cd nginx-${NGINX_VERSION} && curl -L $lua_jit_url | tar xvz )
+
+echo "Downloading $ngx_devel_kit_url"
+(cd nginx-${NGINX_VERSION} && curl -L $ngx_devel_kit_url | tar xvz )
+
+echo "Downloading $ngx_lua_url"
+(cd nginx-${NGINX_VERSION} && curl -L $ngx_lua_url | tar xvz )
+
+echo "Downloading $lua_resty_core_url"
+(cd nginx-${NGINX_VERSION} && curl -L $lua_resty_core_url | tar xvz )
+
+echo "Downloading $lua_resty_lrucache_url"
+(cd nginx-${NGINX_VERSION} && curl -L $lua_resty_lrucache_url | tar xvz )
+
+echo "Downloading $lua_resty_redis_url"
+(cd nginx-${NGINX_VERSION} && curl -L $lua_resty_redis_url | tar xvz )
+
+echo "Installing luajit"
+(cd nginx-${NGINX_VERSION} && cd luajit2-${LUA_JIT_VERSION} && make install)
+
+# tell nginx's build system where to find LuaJIT 2.0:
+export LUAJIT_LIB=/usr/local/lib
+export LUAJIT_INC=/usr/local/include/luajit-2.1
+
 
 # This will build `nginx`
 (
   cd nginx-${NGINX_VERSION}
   ./configure \
+    --with-ld-opt="-Wl,-rpath,/app/lib" \
     --with-pcre=pcre-${PCRE_VERSION} \
     --with-zlib=zlib-${ZLIB_VERSION} \
     --with-http_gzip_static_module \
@@ -53,26 +89,15 @@ echo "Downloading $redis2_nginx_url"
     --prefix=/tmp/nginx \
     --add-module=${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
     --add-module=${temp_dir}/nginx-${NGINX_VERSION}/nginx-uuid4-module-${UUID4_VERSION} \
-    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/redis2-nginx-module-${REDIS2_NGINX_VERSION}
+    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/ngx_devel_kit-${NGX_DEVEL_KIT} \
+    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/lua-nginx-module-${NGX_LUA}
   make install
 )
 
-# This will build `nginx-debug`
-(
-  cd nginx-${NGINX_VERSION}
-  ./configure \
-    --with-debug \
-    --with-pcre=pcre-${PCRE_VERSION} \
-    --with-zlib=zlib-${ZLIB_VERSION} \
-    --with-http_gzip_static_module \
-    --with-http_realip_module \
-    --with-http_ssl_module \
-    --prefix=/tmp/nginx-debug \
-    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
-    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/nginx-uuid4-module-${UUID4_VERSION} \
-    --add-module=${temp_dir}/nginx-${NGINX_VERSION}/redis2-nginx-module-${REDIS2_NGINX_VERSION}
-  make install
-)
+
+
+(cd ${temp_dir}/nginx-${NGINX_VERSION}/lua-resty-core-${LUA_RESTY_CORE} && make install PREFIX=/tmp/nginx)
+(cd ${temp_dir}/nginx-${NGINX_VERSION}/lua-resty-lrucache-${LUA_RESTY_CACHE} && make install PREFIX=/tmp/nginx)
 
 release_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
