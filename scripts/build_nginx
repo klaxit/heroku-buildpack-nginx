@@ -15,7 +15,7 @@ NGX_DEVEL_KIT=${NGX_DEVEL_KIT-0.3.1}
 NGX_LUA=${NGX_LUA-0.10.20}
 LUA_RESTY_CORE=${LUA_RESTY_CORE-0.1.22}
 LUA_RESTY_CACHE=${LUA_RESTY_CACHE-0.11}
-LUA_RESTY_REDIS=${LUA_RESTY_REDIS-0.29}
+
 
 nginx_tarball_url=https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=https://sourceforge.net/projects/pcre/files/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.gz/download
@@ -28,7 +28,7 @@ ngx_devel_kit_url=https://github.com/vision5/ngx_devel_kit/archive/refs/tags/v${
 ngx_lua_url=https://github.com/openresty/lua-nginx-module/archive/refs/tags/v${NGX_LUA}.tar.gz
 lua_resty_core_url=https://github.com/openresty/lua-resty-core/archive/refs/tags/v${LUA_RESTY_CORE}.tar.gz
 lua_resty_lrucache_url=https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${LUA_RESTY_CACHE}.tar.gz
-lua_resty_redis_url=https://github.com/openresty/lua-resty-redis/archive/refs/tags/v${LUA_RESTY_REDIS}.tar.gz
+
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
@@ -64,9 +64,6 @@ echo "Downloading $lua_resty_core_url"
 
 echo "Downloading $lua_resty_lrucache_url"
 (cd nginx-${NGINX_VERSION} && curl -L $lua_resty_lrucache_url | tar xvz )
-
-echo "Downloading $lua_resty_redis_url"
-(cd nginx-${NGINX_VERSION} && curl -L $lua_resty_redis_url | tar xvz )
 
 echo "Installing luajit"
 (cd nginx-${NGINX_VERSION} && cd luajit2-${LUA_JIT_VERSION} && make install)
